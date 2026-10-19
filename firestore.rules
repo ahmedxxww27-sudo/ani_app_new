@@ -1,0 +1,73 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function owns(uid) { return signedIn() && request.auth.uid == uid; }
+
+    match /users/{uid} {
+      allow read: if signedIn();
+      allow create: if owns(uid)
+        && request.resource.data.uid == uid
+        && request.resource.data.username is string
+        && request.resource.data.username.size() >= 1
+        && request.resource.data.username.size() <= 30;
+      allow update: if owns(uid)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.username == resource.data.username;
+      allow delete: if owns(uid);
+
+      match /following/{otherUid} {
+        allow read: if signedIn();
+        allow create, delete: if owns(uid) && otherUid != uid
+          && request.resource.data.uid == otherUid;
+        allow update: if false;
+      }
+      match /followers/{followerUid} {
+        allow read: if signedIn();
+        // Clients should not be trusted to write arbitrary follower edges in production.
+        allow write: if owns(followerUid) && request.resource.data.uid == followerUid;
+      }
+      match /notifications/{notificationId} {
+        allow read, update, delete: if owns(uid);
+        allow create: if false; // Create via trusted Cloud Functions only.
+      }
+    }
+
+    match /usernames/{username} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && !exists(/databases/$(database)/documents/usernames/$(username));
+      allow update, delete: if false; // release/rename via trusted backend.
+    }
+
+    match /posts/{postId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+      allow update: if signedIn() && resource.data.uid == request.auth.uid
+        && request.resource.data.uid == resource.data.uid;
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+
+      match /likes/{uid} {
+        allow read: if signedIn();
+        allow create: if owns(uid) && request.resource.data.uid == uid;
+        allow delete: if owns(uid);
+        allow update: if false;
+      }
+      match /comments/{commentId} {
+        allow read: if signedIn();
+        allow create: if signedIn() && request.resource.data.uid == request.auth.uid
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 2200;
+        allow update: if false;
+        allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+      }
+    }
+
+    match /reports/{reportId} {
+      allow create: if signedIn() && request.resource.data.reporterUid == request.auth.uid;
+      allow read, update, delete: if false;
+    }
+  }
+}

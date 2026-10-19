@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "620985033443",
+    "project_id": "aniapp-28a6f",
+    "storage_bucket": "aniapp-28a6f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:620985033443:android:3588d2fc1cde0f45f79bd6",
+        "android_client_info": {
+          "package_name": "com.example.ani_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtLjX3IRGStriB55rCKaeStxeRSvaXp3Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
