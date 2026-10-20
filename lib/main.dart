@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'login_screen.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(const AniApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class AniApp extends StatelessWidget {
+  const AniApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text('My App')),
-        body: const Center(child: Text('Hello World')),
-      ),
+      debugShowCheckedModeBanner: false,
+      title: 'Ani App',
+      theme: ThemeData.dark(),
+      home: const LoginScreen(),
     );
   }
 }
